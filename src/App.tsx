@@ -1,25 +1,25 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { FC, ReactNode } from 'react';
+import { myLogo } from './assets/AssetConfig';
+import { Routes, Route } from 'react-router-dom';
+import Nav from './components/Nav';
+import { Navigation } from './types';
 
-function App() {
+const members: Array<Navigation.NavMember> = [
+    {
+      name: "Home",
+      link: "/"
+    }
+]
+
+const headerLogo: ReactNode = myLogo;
+
+const App: FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <React.Fragment>
+      <Nav members={members} logo={headerLogo} />
+      <Routes>
+      </Routes>
+    </React.Fragment>
   );
 }
 
