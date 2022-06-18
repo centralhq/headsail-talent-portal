@@ -1,6 +1,6 @@
 import React, { FC, ReactNode } from 'react';
 import { myLogo } from './assets/AssetConfig';
-import { Routes, Route } from 'react-router-dom';
+import { Routes } from 'react-router-dom';
 import Nav from './components/Nav';
 import { Navigation } from './types';
 
