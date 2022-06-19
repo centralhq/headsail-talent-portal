@@ -2,13 +2,12 @@ import React, { FC, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Navigation } from '../types';
 
-interface NavProps {
+type NavProps = {
     members: Array<Navigation.NavMember>;
     logo: ReactNode;
-
 }
 
-const Nav: FC<NavProps> = ({ members, logo }) => {
+const Nav: FC<NavProps & React.HTMLAttributes<HTMLDivElement>> = ({ members, logo }) => {
     return (
         <header className="h-14 flex align-middle static max-w-full border-b border-solid border-gray-500">
           <div className="max-section-width flex justify-between mx-auto w-full pr-4 pl-4">
