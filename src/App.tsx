@@ -3,6 +3,7 @@ import { myLogo } from './assets/AssetConfig';
 import { Routes, Route } from 'react-router-dom';
 import Nav from './components/Nav';
 import MenuBar from './components/MenuBar';
+import ShapeView from './views/ShapeView';
 import { Navigation } from './types';
 
 const members: Array<Navigation.NavMember> = [
@@ -25,6 +26,7 @@ const App: FC = () => {
       </div>
       <div className="flex">
         <Routes>
+          <Route path="/" element={<ShapeView />} />
         </Routes>
       </div>
     </div>
