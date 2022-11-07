@@ -1,5 +1,4 @@
 import React, { FC, useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import ShapeCanvas from '../components/ShapeCanvas';
 import ShapeProperties from '../components/ShapeProperties';
 import { drawShape } from './workers/shapeContext';
@@ -15,6 +14,7 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
     const [shape, setShape] = useState<CentralShapes.ShapeStrings>("CIRCLE");
     const [color, setColor] = useState<CentralShapes.ColorStrings>("RED");
     const [size, setSize] = useState(0);
+    const [shapeUid, setShapeUid] = useState("");
 
     useEffect(() => {
 
@@ -28,6 +28,7 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
                 setShape(payload.shape!);
                 setColor(payload.color!);
                 setSize(payload.size!);
+                setShapeUid(payload.id);
             } else if (parseOpType(opType) === "SHAPE") {
                 setShape(object.payload.newShape!); // TODO: insert detailed object field here
             } else if (parseOpType(opType) === "COLOR") {
@@ -77,70 +78,62 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
     };
 
     const handleShape = (newShape: CentralShapes.ShapeStrings) => {
-        const encoder = new TextEncoder();
-        const reqObject = JSON.stringify(buildShapeRequest(newShape));
-        const bytes = encoder.encode(reqObject);
-        sendBytes(bytes);
+        sendOperation(buildShapeRequest(newShape));
     }
 
     const handleColor = (newColor: CentralShapes.Color) => {
-        const encoder = new TextEncoder();
-        const reqObject = JSON.stringify(buildColorRequest(newColor));
-        const bytes = encoder.encode(reqObject);
-        sendBytes(bytes);
+        sendOperation(buildColorRequest(newColor));
     }
 
-    const handleSize = (newSize: number) => {
-        const encoder = new TextEncoder();
-        const reqObject = JSON.stringify(buildSizeRequest(newSize));
-        const bytes = encoder.encode(reqObject);
-        sendBytes(bytes);
+    const handleSize = (newSize: number) => {   
+        sendOperation(buildSizeRequest(newSize));
     }
 
     const isOpen = (ws: WebSocket) => { return ws.readyState === ws.OPEN }
 
-    const sendBytes = (bytes: Uint8Array) => {
+    const sendOperation = (op: CentralShapes.ShapeOperations) => {
+        const reqObject = JSON.stringify(op);
+        const bytes = new TextEncoder().encode(reqObject);
+
         if (!isOpen(socket)) {
             console.log("WebSocket is CLOSED");
             return;
         }
+        clientHandler.storeLocalConflictId(op.conflictId);
         socket.send(bytes);
     }
 
     const buildShapeRequest = (newShape: CentralShapes.ShapeStrings): CentralShapes.ShapeOperations => {
-        const uid = uuidv4();
         
         return {
             opType: "SET_SHAPE",
-            conflictId: `SET_SHAPE_${uid}`,
+            conflictId: `SET_SHAPE_${shapeUid}`,
             payload: {
-                id: uid,
+                id: shapeUid,
                 newShape: newShape
             }
         }
     }
 
     const buildColorRequest = (newColor: CentralShapes.Color): CentralShapes.ShapeOperations => {
-        const uid = uuidv4();// TODO: Change the uid to the objectId of the object in edit
         
         return {
             opType: "SET_COLOR",
-            conflictId: `SET_COLOR_${uid}`,
+            conflictId: `SET_COLOR_${shapeUid}`,
             payload: {
-                id: uid,
+                id: shapeUid,
                 newColor: newColor
             }
         }
     }
 
     const buildSizeRequest = (newSize: number): CentralShapes.ShapeOperations => {
-        const uid = uuidv4();
         
         return {
             opType: "SET_SIZE",
-            conflictId: `SET_SIZE_${uid}`,
+            conflictId: `SET_SIZE_${shapeUid}`,
             payload: {
-                id: uid,
+                id: shapeUid,
                 newSize: newSize
             }
         }

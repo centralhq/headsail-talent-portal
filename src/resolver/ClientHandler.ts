@@ -16,8 +16,8 @@ export class ClientHandler {
         return localStorage.getItem(this.inflightOpKey);
     }
 
-    storeLocalConflictId(localOp: CentralShapes.ShapeOperations): void {
-        localStorage.setItem(this.inflightOpKey, localOp.conflictId);
+    storeLocalConflictId(conflictId: string): void {
+        localStorage.setItem(this.inflightOpKey, conflictId);
     }
 
     removeLocalConflictId(): void {
@@ -38,8 +38,8 @@ export class ClientHandler {
 
     async handleIncomingOp(op: CentralShapes.AckOperations): Promise<CentralShapes.AckOperations | null> {
         const storedUuid = this.getUuid();
-        if (storedUuid) {
 
+        if (storedUuid) {
             if (op.uuId === storedUuid) {
                 return await this.handleInflightOp(op)
                     .then((op) => op);
