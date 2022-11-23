@@ -111,7 +111,7 @@ export class QPersistence {
     async resolveInflightOp(inflightOp: CentralShapes.AckOperations): Promise<CentralShapes.AckOperations> {
 
         return new Promise<CentralShapes.AckOperations>((resolve, reject) => {
-            const objectStore = this._newTransaction(TransactionMode.READ_ONLY)
+            const objectStore = this._newTransaction(TransactionMode.READ_WRITE)
             .objectStore(this.storeName);
 
             // peek
@@ -122,8 +122,8 @@ export class QPersistence {
                 let resolvedOp = inflightOp;
 
                 if (cursor) {
-                    console.log(`Queue head with key ${cursor.key} has conflictId ${cursor.value.conflictId} and counter ${cursor.value.counter}`);
-                    if (inflightOp.counter > cursor.value.counter) {
+                    console.log(`Queue head with key ${cursor.key} has conflictId ${cursor.value.conflictId} and counter ${cursor.value.payload.newCounter}`);
+                    if (inflightOp.payload.newCounter > cursor.value.payload.newCounter) {
                         // get and remove, in the event that the local op counter is higher
                         this._popOp(objectStore, cursor.key).then((object => {
                             resolvedOp = inflightOp;
@@ -134,7 +134,7 @@ export class QPersistence {
 
                         });
                     
-                    } else if (inflightOp.counter < cursor.value.counter) {
+                    } else if (inflightOp.payload.newCounter < cursor.value.payload.newCounter) {
                          // get and remove, in the event that the remote op counter is higher
                          this._popOp(objectStore, cursor.key).then((object => {
                             resolvedOp = object;

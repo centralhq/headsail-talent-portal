@@ -51,7 +51,8 @@ export namespace CentralShapes {
     shape?:     ShapeStrings,
     newShape?:  ShapeStrings,
     size?:      number,
-    newSize?:   number
+    newSize?:   number,
+    newCounter: number
   }
 
   export type AckOperations = {

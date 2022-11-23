@@ -23,12 +23,14 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
         const parseResponse = (object: CentralShapes.AckOperations) => {
             const opType = object.opType;
             const payload = object.payload;
+            const uuid = object.uuId;
             console.log(object);
             if (opType === "load") { // move this outta here
                 setShape(payload.shape!);
                 setColor(payload.color!);
                 setSize(payload.size!);
                 setShapeUid(payload.id);
+                clientHandler.storeUuid(uuid);
             } else if (parseOpType(opType) === "SHAPE") {
                 setShape(object.payload.newShape!); // TODO: insert detailed object field here
             } else if (parseOpType(opType) === "COLOR") {
@@ -100,6 +102,7 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
             return;
         }
         clientHandler.storeLocalConflictId(op.conflictId);
+        console.log("sending packet: ", op);
         socket.send(bytes);
     }
 
@@ -141,7 +144,7 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
     }
 
     /**
-     * opType string is in format "SET_COLOR_payloadId"
+     * opType string is in format "SET_COLOR_conflictId"
      * @param opType 
      */
     const parseOpType = (opType: string) => {
