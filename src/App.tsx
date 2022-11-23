@@ -1,7 +1,9 @@
 import React, { FC, ReactNode } from 'react';
 import { myLogo } from './assets/AssetConfig';
-import { Routes } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Nav from './components/Nav';
+import MenuBar from './components/MenuBar';
+import ShapeView from './views/ShapeView';
 import { Navigation } from './types';
 
 const members: Array<Navigation.NavMember> = [
@@ -15,11 +17,19 @@ const headerLogo: ReactNode = myLogo;
 
 const App: FC = () => {
   return (
-    <React.Fragment>
-      <Nav members={members} logo={headerLogo} />
-      <Routes>
-      </Routes>
-    </React.Fragment>
+    <div className="grid h-full grid-cols-2">
+      <div className="col-span-2">
+        <Nav members={members} logo={headerLogo} />
+      </div> 
+      <div className="flex w-40 max-h-full">
+        <MenuBar username="birudeghi" loggedIn={true} />
+      </div>
+      <div className="flex">
+        <Routes>
+          <Route path="/" element={<ShapeView />} />
+        </Routes>
+      </div>
+    </div>
   );
 }
 
