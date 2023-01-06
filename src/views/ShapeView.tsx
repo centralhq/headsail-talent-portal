@@ -2,12 +2,10 @@ import React, { FC, useState, useEffect } from 'react';
 import ShapeCanvas from '../components/ShapeCanvas';
 import ShapeProperties from '../components/ShapeProperties';
 import { drawShape } from './workers/shapeContext';
-import { ClientHandler } from '../resolver/ClientHandler';
 import { CentralShapes } from '../types';
 
 
 const socket = new WebSocket("ws://localhost:8080/ws")
-const clientHandler = new ClientHandler();
 
 const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
     
@@ -23,14 +21,12 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
         const parseResponse = (object: CentralShapes.AckOperations) => {
             const opType = object.opType;
             const payload = object.payload;
-            const uuid = object.uuId;
             console.log(object);
             if (opType === "load") { // move this outta here
                 setShape(payload.shape!);
                 setColor(payload.color!);
                 setSize(payload.size!);
                 setShapeUid(payload.id);
-                clientHandler.storeUuid(uuid);
             } else if (parseOpType(opType) === "SHAPE") {
                 setShape(object.payload.newShape!); // TODO: insert detailed object field here
             } else if (parseOpType(opType) === "COLOR") {
@@ -53,17 +49,11 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
                 socket.addEventListener('message',
                     event => {
                         const object = JSON.parse(event.data);
-                        // How do you differentiate between local inflight op and broadcasted remote op: uuid
-                        clientHandler.handleIncomingOp(object)
-                            .then((op) => {
-                                if (op) {
-                                    parseResponse(op);
-                                }
-                            });
+                        parseResponse(object);
                     }
-                )
-            }   
-        }
+                );
+            }
+        }  
         
         init();
         return () => {isSubscribed = false};
@@ -93,7 +83,7 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
 
     const isOpen = (ws: WebSocket) => { return ws.readyState === ws.OPEN }
 
-    const sendOperation = (op: CentralShapes.ShapeOperations) => {
+    const sendOperation = (op: Object) => {
         const reqObject = JSON.stringify(op);
         const bytes = new TextEncoder().encode(reqObject);
 
@@ -101,46 +91,32 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
             console.log("WebSocket is CLOSED");
             return;
         }
-        clientHandler.storeLocalConflictId(op.conflictId);
         console.log("sending packet: ", op);
         socket.send(bytes);
     }
 
-    const buildShapeRequest = (newShape: CentralShapes.ShapeStrings): CentralShapes.ShapeOperations => {
+    const buildShapeRequest = (newShape: CentralShapes.ShapeStrings): Object => {
         
         return {
-            opType: "SET_SHAPE",
-            conflictId: `SET_SHAPE_${shapeUid}`,
-            payload: {
-                id: shapeUid,
-                newShape: newShape
-            }
+            id: shapeUid,
+            newShape: newShape
         }
     }
 
-    const buildColorRequest = (newColor: CentralShapes.Color): CentralShapes.ShapeOperations => {
+    const buildColorRequest = (newColor: CentralShapes.Color): Object => {
         
         return {
-            opType: "SET_COLOR",
-            conflictId: `SET_COLOR_${shapeUid}`,
-            payload: {
-                id: shapeUid,
-                newColor: newColor
-            }
+            id: shapeUid,
+            newColor: newColor
         }
     }
 
-    const buildSizeRequest = (newSize: number): CentralShapes.ShapeOperations => {
+    const buildSizeRequest = (newSize: number): Object => {
         
         return {
-            opType: "SET_SIZE",
-            conflictId: `SET_SIZE_${shapeUid}`,
-            payload: {
-                id: shapeUid,
-                newSize: newSize
-            }
+            id: shapeUid,
+            newSize: newSize
         }
-
     }
 
     /**
