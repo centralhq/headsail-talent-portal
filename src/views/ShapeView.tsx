@@ -17,24 +17,20 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
     useEffect(() => {
 
         let isSubscribed = true;
-
-        const parseResponse = (object: CentralShapes.AckOperations) => {
-            const opType = object.opType;
-            const payload = object.payload;
+        // need to rework this.
+        const parseResponse = (object: CentralShapes.AckPayload) => {
             console.log(object);
-            if (opType === "load") { // move this outta here
-                setShape(payload.shape!);
-                setColor(payload.color!);
-                setSize(payload.size!);
-                setShapeUid(payload.id);
-            } else if (parseOpType(opType) === "SHAPE") {
-                setShape(object.payload.newShape!); // TODO: insert detailed object field here
-            } else if (parseOpType(opType) === "COLOR") {
-                setColor(object.payload.newColor!);
-            } else if (parseOpType(opType) === "SIZE") {
-                setSize(object.payload.newSize!);
+            if (object.newShape) {
+                setShape(object.newShape!); // TODO: insert detailed object field here
+            } else if (object.newColor) {
+                setColor(object.newColor!);
+            } else if (object.newSize) {
+                setSize(object.newSize!);
             } else {
-                // TODO: error here
+                setShape(object.shape!);
+                setColor(object.color!);
+                setSize(object.size!);
+                setShapeUid(object.id);
             }
         }
 
@@ -98,6 +94,7 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
     const buildShapeRequest = (newShape: CentralShapes.ShapeStrings): Object => {
         
         return {
+            opType: "SET_SHAPE",
             id: shapeUid,
             newShape: newShape
         }
@@ -106,6 +103,7 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
     const buildColorRequest = (newColor: CentralShapes.Color): Object => {
         
         return {
+            opType: "SET_COLOR",
             id: shapeUid,
             newColor: newColor
         }
@@ -114,19 +112,11 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
     const buildSizeRequest = (newSize: number): Object => {
         
         return {
+            opType: "SET_SIZE",
             id: shapeUid,
             newSize: newSize
         }
     }
-
-    /**
-     * opType string is in format "SET_COLOR_conflictId"
-     * @param opType 
-     */
-    const parseOpType = (opType: string) => {
-        return opType.split("_")[1]
-    }
-
     
 
     return (

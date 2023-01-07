@@ -46,6 +46,7 @@ export namespace CentralShapes {
 
   export type AckPayload = {
     id: string,
+    uuid: string,
     color?:     ColorStrings,
     newColor?:  ColorStrings,
     shape?:     ShapeStrings,
