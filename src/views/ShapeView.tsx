@@ -20,17 +20,17 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
         // need to rework this.
         const parseResponse = (object: CentralShapes.AckPayload) => {
             console.log(object);
-            if (object.newShape) {
-                setShape(object.newShape!); // TODO: insert detailed object field here
-            } else if (object.newColor) {
-                setColor(object.newColor!);
-            } else if (object.newSize) {
-                setSize(object.newSize!);
-            } else {
+            if (!object.opType) {
                 setShape(object.shape!);
                 setColor(object.color!);
                 setSize(object.size!);
                 setShapeUid(object.id);
+            } else if (parseOpType(object.opType) === "SHAPE") {
+                setShape(object.newShape!); // TODO: insert detailed object field here
+            } else if (parseOpType(object.opType) === "COLOR") {
+                setColor(object.newColor!);
+            } else if (parseOpType(object.opType) === "SIZE") {
+                setSize(object.newSize!);
             }
         }
 
@@ -118,6 +118,9 @@ const ShapeView: FC<React.HTMLAttributes<HTMLDivElement>> = () => {
         }
     }
     
+    const parseOpType = (opType: string) => {
+        return opType.split("_")[1]
+    }
 
     return (
         <div className="w-full h-full items-start content-start">

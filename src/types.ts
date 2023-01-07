@@ -33,20 +33,10 @@ export namespace CentralShapes {
 
   export type ColorStrings = keyof typeof Color;
 
-  export type ShapeOperations = {
-    opType: string,
-    conflictId: string,
-    payload: {
-      id: string,
-      newColor?:  ColorStrings,
-      newShape?:  ShapeStrings,
-      newSize?:   number 
-    }
-  }
-
   export type AckPayload = {
     id: string,
     uuid: string,
+    opType: string,
     color?:     ColorStrings,
     newColor?:  ColorStrings,
     shape?:     ShapeStrings,
@@ -54,14 +44,5 @@ export namespace CentralShapes {
     size?:      number,
     newSize?:   number,
     newCounter: number
-  }
-
-  export type AckOperations = {
-    status: string,
-    opType: string,
-    uuId: string,
-    conflictId:	string,
-    counter: number, 
-    payload: AckPayload
   }
 }
